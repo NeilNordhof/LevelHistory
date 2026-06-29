@@ -1,0 +1,38 @@
+name: Package Addon
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build zip
+        run: |
+          mkdir -p dist/LevelHistory
+          cp Addon/LevelHistory.toc dist/LevelHistory/
+          cp Addon/main.lua dist/LevelHistory/
+          cp Addon/icon.tga dist/LevelHistory/
+          cp Addon/README.md dist/LevelHistory/
+          cp Addon/CHANGELOG.md dist/LevelHistory/
+          cd dist
+          zip -r LevelHistory.zip LevelHistory/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: LevelHistory
+          path: dist/LevelHistory.zip
+          if-no-files-found: error
+
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/LevelHistory.zip

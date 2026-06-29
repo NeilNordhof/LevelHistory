@@ -1,0 +1,9 @@
+## Interface: 120005
+## Title: Level History
+## IconTexture: Interface\Addons\LevelHistory\logo
+## Author: Dyhrd
+## Version 1.3
+
+## SavedVariables: Characters
+
+main.lua
