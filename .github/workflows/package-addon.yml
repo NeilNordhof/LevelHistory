@@ -8,6 +8,8 @@ on:
 jobs:
   package:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -16,11 +18,11 @@ jobs:
       - name: Build zip
         run: |
           mkdir -p dist/LevelHistory
-          cp Addon/LevelHistory.toc dist/LevelHistory/
-          cp Addon/main.lua dist/LevelHistory/
-          cp Addon/icon.tga dist/LevelHistory/
-          cp Addon/README.md dist/LevelHistory/
-          cp Addon/CHANGELOG.md dist/LevelHistory/
+          cp LevelHistory.toc dist/LevelHistory/
+          cp main.lua dist/LevelHistory/
+          cp icon.tga dist/LevelHistory/
+          cp README.md dist/LevelHistory/
+          cp CHANGELOG.md dist/LevelHistory/
           cd dist
           zip -r LevelHistory.zip LevelHistory/
 
