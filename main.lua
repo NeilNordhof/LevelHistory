@@ -22,6 +22,8 @@ local AchievementMilestoneIds = {
 
 local characterGuid = UnitGUID("player")
 local currentILvl
+local XP_SNAPSHOT_INTERVAL = 120
+local lastXpSnapshotTime = 0
 
 local f = CreateFrame("Frame")
 
@@ -43,13 +45,22 @@ function f:PLAYER_LOGIN(event)
 
     -- Create snapshots for the character's current state
     -- Want to do this every login, so we know the last time they were at the prior level after a long time logged out
-    self:RecordLevelSnapshot(UnitLevel("player"))
+    self:RecordPartialLevelSnapshot()
     local _, iLvl = GetAverageItemLevel()
     self:RecordGearSnapshot(iLvl)
 end
 
 function f:PLAYER_LEVEL_UP(event, level)
-    self:RecordLevelSnapshot(level)
+    self:RecordLevelSnapshot(level + 0.0)
+end
+
+function f:PLAYER_XP_UPDATE(event)
+    local now = time()
+
+    if now - lastXpSnapshotTime >= XP_SNAPSHOT_INTERVAL then
+        self:RecordPartialLevelSnapshot()
+        lastXpSnapshotTime = now
+    end
 end
 
 function f:PLAYER_AVG_ITEM_LEVEL_UPDATE(event)
@@ -65,7 +76,9 @@ function f:TIME_PLAYED_MSG(event, totalTimePlayed, levelTimePlayed)
     self:RecordTimePlayedSnapshot(totalTimePlayed)
 end
 
-function f:PLAYER_LEAVEING_WORLD(event)
+function f:PLAYER_LEAVING_WORLD(event)
+    self:RecordPartialLevelSnapshot()
+    lastXpSnapshotTime = time()
     RequestTimePlayed()
 end
 
@@ -83,6 +96,7 @@ function f:UpdateCharacter()
     local faction = UnitFactionGroup("player")
 
     Characters[characterGuid].Name = name
+    Characters[characterGuid].Realm = GetRealmName()
     Characters[characterGuid].Class = class
     Characters[characterGuid].Specialization = specName
     Characters[characterGuid].Race = race
@@ -93,6 +107,7 @@ function f:AddCharacter()
     -- Create our character record with empty histories, then populate demographics
     Characters[characterGuid] = {
         Name = "",
+        Realm = "",
         Class = "",
         Specialization = "",
         Race = "",
@@ -127,6 +142,22 @@ function f:RecordLevelSnapshot(level, timeStamp)
     table.insert(Characters[characterGuid].LevelHistory, {timeStamp, level})
 end
 
+function f:RecordPartialLevelSnapshot(timeStamp)
+    timeStamp = timeStamp or time()
+    local level = UnitLevel("player")
+    local currentXp = UnitXP("player")
+    local maxXp = UnitXPMax("player")
+    local partialLevel
+
+    if maxXp and maxXp > 0 then
+        partialLevel = level + (currentXp / maxXp)
+    else
+        partialLevel = level + 0.0
+    end
+
+    self:RecordLevelSnapshot(partialLevel, timeStamp)
+end
+
 function f:RecordGearSnapshot(ilvl, timeStamp)
     timeStamp = timeStamp or time()
 
@@ -152,9 +183,10 @@ end
 
 f:RegisterEvent("PLAYER_LOGIN")
 f:RegisterEvent("PLAYER_LEVEL_UP")
+f:RegisterEvent("PLAYER_XP_UPDATE")
 f:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE")
 f:RegisterEvent("TIME_PLAYED_MSG")
-f:RegisterEvent("PLAYER_LEAVEING_WORLD")
+f:RegisterEvent("PLAYER_LEAVING_WORLD")
 
 f:SetScript("OnEvent", f.OnEvent)
 
