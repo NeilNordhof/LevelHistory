@@ -12,3 +12,5 @@ All notable changes to the LevelHistory addon are documented here.
 - Character information (name, class, specialization, race, faction) is now refreshed on every login, not just when a new character is first detected. This ensures the addon reflects changes from race changes, faction transfers, and spec swaps without needing to wipe saved data.
 
 ## [Unreleased]
+### Fixed
+- GitHub Actions release workflow now triggers on push after renaming the default branch from `master` to `main`.
