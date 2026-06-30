@@ -4,7 +4,7 @@ A World of Warcraft addon that tracks character progression over time — levels
 
 ## What it tracks
 
-- **Level history** — records a snapshot on every level-up, and backfills historical level milestones from Achievement data on first login
+- **Level history** — records a snapshot on every level-up, on experience gains (minimum 2 minutes betweeen snapshots), and backfills historical level milestones from Achievement data on first login
 - **Gear history** — records a snapshot whenever average item level increases, and on every login
 - **Time played** — records a snapshot on every logout via `TIME_PLAYED_MSG`
 
@@ -29,4 +29,4 @@ This addon is one part of the broader WLH (WoW Level History) project:
 
 ## Requirements
 
-- World of Warcraft Retail (Interface 120005+)
+- World of Warcraft Retail (Interface 120007+)
