@@ -29,4 +29,4 @@ This addon is one part of the broader WLH (WoW Level History) project:
 
 ## Requirements
 
-- World of Warcraft Retail (Interface 120007+)
+- World of Warcraft Retail (Interface 120100+)
