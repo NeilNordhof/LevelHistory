@@ -1,6 +1,6 @@
 # Level History
 
-A World of Warcraft addon that tracks character progression over time — levels reached, average item level, and time played — and stores it locally for consumption by the WLH sync tool.
+A World of Warcraft addon that tracks character progression over time — levels reached, average item level, and time played — and stores it locally for the WLH desktop app to read.
 
 ## What it tracks
 
@@ -8,7 +8,7 @@ A World of Warcraft addon that tracks character progression over time — levels
 - **Gear history** — records a snapshot whenever average item level increases, and on every login
 - **Time played** — records a snapshot on every logout via `TIME_PLAYED_MSG`
 
-All data is stored in the `Characters` SavedVariables file, keyed by character GUID.
+All data is stored in `LevelHistory.lua`, in the Account-level SavedVariables folder, under the `Characters` table, keyed by character GUID.
 
 ## Installation
 
@@ -23,9 +23,7 @@ This addon is one part of the broader WLH (WoW Level History) project:
 | Component | Purpose |
 |---|---|
 | **LevelHistory** (this addon) | Writes progression data to SavedVariables |
-| **wlh-sync** | Watches the SavedVariables file, parses it, and uploads to the API |
-| **wlh-api** | Web API that stores and serves character progression data |
-| **wlh-web** | Frontend dashboard with progression charts |
+| **wlh-app** | Tray-resident Windows desktop app — syncs progression data from SavedVariables into a local database and displays it in charts and tables |
 
 ## Requirements
 
