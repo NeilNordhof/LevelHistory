@@ -176,8 +176,6 @@ function f:RecordTimePlayedSnapshot(timePlayed, timeStamp)
         Characters[characterGuid].TimePlayedHistory = {}
     end
 
-    print("Recording time played snapshot: " .. timePlayed .. " at " .. timeStamp)
-
     table.insert(Characters[characterGuid].TimePlayedHistory, {timeStamp, timePlayed})
 end
 

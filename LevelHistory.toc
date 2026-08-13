@@ -1,8 +1,8 @@
 ## Interface: 120100
 ## Title: Level History
-## IconTexture: Interface\Addons\LevelHistory\logo
+## IconTexture: Interface\Addons\LevelHistory\icon
 ## Author: Dyhrd
-## Version 1.4
+## Version: 1.4.1
 
 ## SavedVariables: Characters
 

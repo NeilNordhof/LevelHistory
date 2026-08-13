@@ -14,6 +14,50 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Verify version is synced across tag, .toc, and CHANGELOG
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          TOC_VERSION=$(grep -oP '^## Version:\s+\K\S+' LevelHistory.toc)
+          CHANGELOG_VERSION=$(grep -m1 -oP '^## \[\K[0-9][^\]]*' CHANGELOG.md)
+
+          echo "Tag version:       $TAG_VERSION"
+          echo "TOC version:       $TOC_VERSION"
+          echo "CHANGELOG version: $CHANGELOG_VERSION"
+
+          if [ "$TAG_VERSION" != "$TOC_VERSION" ] || [ "$TAG_VERSION" != "$CHANGELOG_VERSION" ]; then
+            echo "::error::Version mismatch — tag=$TAG_VERSION, LevelHistory.toc=$TOC_VERSION, CHANGELOG.md=$CHANGELOG_VERSION. All three must match."
+            exit 1
+          fi
+
+      - name: Verify version is greater than the previous release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PREVIOUS_VERSION=$(git tag --list 'v*' | grep -v "^${GITHUB_REF_NAME}$" | sed 's/^v//' | sort -V | tail -1)
+
+          if [ -z "$PREVIOUS_VERSION" ]; then
+            echo "No previous release tag found — treating $TAG_VERSION as the first release."
+            exit 0
+          fi
+
+          echo "Previous released version: $PREVIOUS_VERSION"
+          echo "New version:                $TAG_VERSION"
+
+          if [ "$TAG_VERSION" = "$PREVIOUS_VERSION" ]; then
+            echo "::error::Version $TAG_VERSION was already released. Bump the version before tagging."
+            exit 1
+          fi
+
+          HIGHEST=$(printf '%s\n%s\n' "$PREVIOUS_VERSION" "$TAG_VERSION" | sort -V | tail -1)
+
+          if [ "$HIGHEST" != "$TAG_VERSION" ]; then
+            echo "::error::Version $TAG_VERSION is not greater than the previous release ($PREVIOUS_VERSION)."
+            exit 1
+          fi
 
       - name: Build zip
         run: |
