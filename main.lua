@@ -24,6 +24,11 @@ local characterGuid = UnitGUID("player")
 local currentILvl
 local XP_SNAPSHOT_INTERVAL = 120
 local lastXpSnapshotTime = 0
+local lastPartialLevel
+local TIME_PLAYED_FALLBACK_DELAY = 10
+local timePlayedRequested = false
+local lastTimePlayed
+local lastTimePlayedAt
 
 local f = CreateFrame("Frame")
 
@@ -48,17 +53,28 @@ function f:PLAYER_LOGIN(event)
     self:RecordPartialLevelSnapshot()
     local _, iLvl = GetAverageItemLevel()
     self:RecordGearSnapshot(iLvl)
+
+    -- The default UI never asks for time played on its own, so ask ourselves unless another addon already has
+    C_Timer.After(TIME_PLAYED_FALLBACK_DELAY, function()
+        if not timePlayedRequested then
+            RequestTimePlayed()
+        end
+    end)
 end
 
 function f:PLAYER_LEVEL_UP(event, level)
-    self:RecordLevelSnapshot(level + 0.0)
+    lastPartialLevel = level + 0.0
+    self:RecordLevelSnapshot(lastPartialLevel)
 end
 
 function f:PLAYER_XP_UPDATE(event)
     local now = time()
 
+    -- Kept current even when the snapshot itself is throttled, since logout writes this instead of asking the API
+    self:UpdatePartialLevel()
+
     if now - lastXpSnapshotTime >= XP_SNAPSHOT_INTERVAL then
-        self:RecordPartialLevelSnapshot()
+        self:RecordLevelSnapshot(lastPartialLevel)
         lastXpSnapshotTime = now
     end
 end
@@ -73,13 +89,26 @@ function f:PLAYER_AVG_ITEM_LEVEL_UPDATE(event)
 end
 
 function f:TIME_PLAYED_MSG(event, totalTimePlayed, levelTimePlayed)
-    self:RecordTimePlayedSnapshot(totalTimePlayed)
+    timePlayedRequested = true
+    lastTimePlayed = totalTimePlayed
+    lastTimePlayedAt = time()
+    self:RecordTimePlayedSnapshot(totalTimePlayed, lastTimePlayedAt)
 end
 
-function f:PLAYER_LEAVING_WORLD(event)
-    self:RecordPartialLevelSnapshot()
-    lastXpSnapshotTime = time()
-    RequestTimePlayed()
+-- Fires only on logout and /reload (PLAYER_LEAVING_WORLD also fires on every loading screen), right before
+-- SavedVariables are written. The level API returns bad values this late, so write the last value seen instead.
+function f:PLAYER_LOGOUT(event)
+    local now = time()
+
+    if lastPartialLevel then
+        self:RecordLevelSnapshot(lastPartialLevel, now)
+    end
+
+    -- A reply to a fresh time played request can't arrive before the UI unloads, but played time keeps counting through
+    -- loading screens and reloads, so the last reply plus the seconds since it arrived is the played total right now.
+    if lastTimePlayed then
+        self:RecordTimePlayedSnapshot(lastTimePlayed + (now - lastTimePlayedAt), now)
+    end
 end
 
 function f:UpdateCharacter()
@@ -143,19 +172,20 @@ function f:RecordLevelSnapshot(level, timeStamp)
 end
 
 function f:RecordPartialLevelSnapshot(timeStamp)
-    timeStamp = timeStamp or time()
+    self:UpdatePartialLevel()
+    self:RecordLevelSnapshot(lastPartialLevel, timeStamp)
+end
+
+function f:UpdatePartialLevel()
     local level = UnitLevel("player")
     local currentXp = UnitXP("player")
     local maxXp = UnitXPMax("player")
-    local partialLevel
 
     if maxXp and maxXp > 0 then
-        partialLevel = level + (currentXp / maxXp)
+        lastPartialLevel = level + (currentXp / maxXp)
     else
-        partialLevel = level + 0.0
+        lastPartialLevel = level + 0.0
     end
-
-    self:RecordLevelSnapshot(partialLevel, timeStamp)
 end
 
 function f:RecordGearSnapshot(ilvl, timeStamp)
@@ -184,7 +214,13 @@ f:RegisterEvent("PLAYER_LEVEL_UP")
 f:RegisterEvent("PLAYER_XP_UPDATE")
 f:RegisterEvent("PLAYER_AVG_ITEM_LEVEL_UPDATE")
 f:RegisterEvent("TIME_PLAYED_MSG")
-f:RegisterEvent("PLAYER_LEAVING_WORLD")
+f:RegisterEvent("PLAYER_LOGOUT")
 
 f:SetScript("OnEvent", f.OnEvent)
+
+-- Counts another addon's request whose reply hasn't arrived yet when the fallback timer fires. Addons that cached
+-- RequestTimePlayed in a local before this ran bypass the hook, which is why TIME_PLAYED_MSG sets the flag too.
+hooksecurefunc("RequestTimePlayed", function()
+    timePlayedRequested = true
+end)
 

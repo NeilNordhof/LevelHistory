@@ -2,6 +2,15 @@
 
 All notable changes to the LevelHistory addon are documented here.
 
+## [1.4.2] - 2026-10-05
+
+### Added
+- Time played is requested 10 seconds after login if no other addon has requested it by then, since the default UI never requests it on its own.
+
+### Fixed
+- The end-of-session level snapshot is now recorded on `PLAYER_LOGOUT` from the last partial level seen while playing. It was recorded on `PLAYER_LEAVING_WORLD`, which also fires on every loading screen, and queried the level API during logout, which returns bad values (e.g. level 1).
+- Time played is now recorded at logout by adding the seconds since the last time played reply to that reply's total, since played time keeps counting through loading screens and reloads. This replaces the time played request on logout, whose reply could never arrive before the game unloads the UI.
+
 ## [1.4.1] - 2026-08-12
 
 ### Added
