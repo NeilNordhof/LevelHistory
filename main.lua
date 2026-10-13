@@ -114,7 +114,7 @@ end
 function f:UpdateCharacter()
     local name = UnitName("player")
     local class, _, classId = UnitClass("player")
-    local spec = GetSpecialization()
+    local spec = C_SpecializationInfo.GetSpecialization()
 
     if not spec then
         spec = 5

@@ -13,7 +13,9 @@ All data is stored in `LevelHistory.lua`, in the Account-level SavedVariables fo
 ## Installation
 
 1. Download `LevelHistory.zip` from the [latest release](../../releases/latest)
-2. Extract the `LevelHistory` folder into your `World of Warcraft\_retail_\Interface\AddOns\` directory
+2. Extract the `LevelHistory` folder into your game client's `Interface\AddOns\` directory:
+   - Retail: `World of Warcraft\_retail_\Interface\AddOns\`
+   - Forever: the `Interface\AddOns\` folder inside the Forever client's folder under `World of Warcraft\`
 3. Restart the game or reload your UI (`/reload`)
 
 ## WLH Ecosystem
@@ -23,8 +25,8 @@ This addon is one part of the broader WLH (WoW Level History) project:
 | Component | Purpose |
 |---|---|
 | **LevelHistory** (this addon) | Writes progression data to SavedVariables |
-| **wlh-app** | Tray-resident Windows desktop app — syncs progression data from SavedVariables into a local database and displays it in charts and tables |
+| **wlh-app** | Tray-resident Windows desktop app — syncs Retail progression data from SavedVariables into a local database and displays it in charts and tables |
 
 ## Requirements
 
-- World of Warcraft Retail (Interface 120100+)
+- World of Warcraft Retail (Interface 120105+) or World of Warcraft: Forever (Interface 16001+)

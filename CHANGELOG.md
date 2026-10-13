@@ -2,6 +2,15 @@
 
 All notable changes to the LevelHistory addon are documented here.
 
+## [1.5.0] - 2026-10-13
+
+### Added
+- Support for World of Warcraft: Forever (Interface 16001). Forever runs the Retail API, so the same addon works on both clients.
+
+### Changed
+- Updated for Retail patch 12.1.5 (Interface 120105).
+- The character's specialization is now read with `C_SpecializationInfo.GetSpecialization()` instead of the deprecated `GetSpecialization()` alias. Forever doesn't define that alias, so the login handler stopped before recording the character's details, the login level and gear snapshots, and the time played request. Blizzard will also remove the alias from Retail at the next expansion.
+
 ## [1.4.2] - 2026-10-05
 
 ### Added
