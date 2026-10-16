@@ -12,7 +12,7 @@ All data is stored in `LevelHistory.lua`, in the Account-level SavedVariables fo
 
 ## Installation
 
-1. Download `LevelHistory.zip` from the [latest release](../../releases/latest)
+1. Download `LevelHistory-<version>.zip` from the [latest release](../../releases/latest)
 2. Extract the `LevelHistory` folder into your game client's `Interface\AddOns\` directory:
    - Retail: `World of Warcraft\_retail_\Interface\AddOns\`
    - Forever: the `Interface\AddOns\` folder inside the Forever client's folder under `World of Warcraft\`

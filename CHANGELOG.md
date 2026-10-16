@@ -2,6 +2,11 @@
 
 All notable changes to the LevelHistory addon are documented here.
 
+## [Unreleased]
+
+### Changed
+- Release zips are now named `LevelHistory-<version>.zip` instead of `LevelHistory.zip`. The `LevelHistory` folder inside is unchanged.
+
 ## [1.5.0] - 2026-10-13
 
 ### Added
@@ -40,6 +45,3 @@ All notable changes to the LevelHistory addon are documented here.
 
 ### Changed
 - Character information (name, class, specialization, race, faction) is now refreshed on every login, not just when a new character is first detected. This ensures the addon reflects changes from race changes, faction transfers, and spec swaps without needing to wipe saved data.
-
-## [Unreleased]
-
